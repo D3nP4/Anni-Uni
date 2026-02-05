@@ -96,7 +96,6 @@
       }
 
       .question-block {
-        margin-top: 24px;
         padding: 18px;
         border-radius: 22px;
         background: #fff6ea;
@@ -110,8 +109,20 @@
       }
 
       .cloud.small {
-        min-height: 300px;
+        min-height: 240px;
         border-radius: 20px;
+      }
+
+      .clouds-grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      @media (min-width: 980px) {
+        .clouds-grid {
+          grid-template-columns: 1fr 1fr;
+          align-items: start;
+        }
       }
 
       .empty {
@@ -154,7 +165,7 @@
         <a href="answers.html" style="margin-left: 12px;">Show answers</a>
       </section>
 
-      <section id="clouds"></section>
+      <section id="clouds" class="clouds-grid"></section>
       <div class="empty" id="empty-state" style="display: none;">No answers to visualize yet.</div>
     </main>
 
