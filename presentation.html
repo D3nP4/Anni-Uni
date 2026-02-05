@@ -139,8 +139,29 @@
       <div class="empty" id="empty-state" style="display: none;">No answers to visualize yet.</div>
     </main>
 
-    <script>
-      const STORAGE_KEY = "qa_entries";
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        query,
+        orderBy,
+        onSnapshot
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCSNDvrvuwDketbB-AlfFoJQysooJdq6JY",
+        authDomain: "anni-uni.firebaseapp.com",
+        projectId: "anni-uni",
+        storageBucket: "anni-uni.firebasestorage.app",
+        messagingSenderId: "32747088221",
+        appId: "1:32747088221:web:5f239767a260925083a0b4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const entriesRef = collection(db, "entries");
+
       const VIEW_PASSWORD = "admin";
       const cloud = document.getElementById("cloud");
       const emptyState = document.getElementById("empty-state");
@@ -192,14 +213,6 @@
         "no",
         "yes"
       ]);
-
-      function loadEntries() {
-        try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        } catch {
-          return [];
-        }
-      }
 
       function tokenize(text) {
         return text
@@ -260,7 +273,7 @@
         wordEl.style.top = `${Math.random() * (bounds.height - h)}px`;
       }
 
-      function renderCloud() {
+      async function renderCloud() {
         const input = window.prompt("Enter password to view presentation:");
         if (!input || input !== VIEW_PASSWORD) {
           emptyState.style.display = "block";
@@ -268,32 +281,36 @@
           return;
         }
 
-        const entries = loadEntries();
-        const freq = buildFrequency(entries);
+        onSnapshot(query(entriesRef, orderBy("createdAt", "asc")), (snapshot) => {
+          const entries = snapshot.docs.map((docSnap) => docSnap.data());
+          const freq = buildFrequency(entries);
+          cloud.innerHTML = "";
 
-        if (freq.length === 0) {
-          emptyState.style.display = "block";
-          return;
-        }
+          if (freq.length === 0) {
+            emptyState.style.display = "block";
+            return;
+          }
 
-        const values = freq.map((item) => item[1]);
-        const min = Math.min(...values);
-        const max = Math.max(...values);
+          emptyState.style.display = "none";
+          const values = freq.map((item) => item[1]);
+          const min = Math.min(...values);
+          const max = Math.max(...values);
 
-        const bounds = cloud.getBoundingClientRect();
+          const bounds = cloud.getBoundingClientRect();
 
-        freq.forEach(([word, count], index) => {
-          const size = max === min ? 22 : 18 + ((count - min) / (max - min)) * 34;
-          const span = document.createElement("span");
-          span.className = `word${index % 4 === 0 ? " accent" : ""}`;
-          span.style.fontSize = `${size}px`;
-          span.style.transform = `rotate(${(index % 6 - 3) * 3}deg)`;
-          span.textContent = word;
-          span.style.visibility = "hidden";
-          cloud.appendChild(span);
-          span.getBoundingClientRect();
-          span.style.visibility = "visible";
-          placeWord(span, bounds);
+          freq.forEach(([word, count], index) => {
+            const size = max === min ? 22 : 18 + ((count - min) / (max - min)) * 34;
+            const span = document.createElement("span");
+            span.className = `word${index % 4 === 0 ? " accent" : ""}`;
+            span.style.fontSize = `${size}px`;
+            span.style.transform = `rotate(${(index % 6 - 3) * 3}deg)`;
+            span.textContent = word;
+            span.style.visibility = "hidden";
+            cloud.appendChild(span);
+            span.getBoundingClientRect();
+            span.style.visibility = "visible";
+            placeWord(span, bounds);
+          });
         });
       }
 

@@ -247,25 +247,36 @@
       </section>
     </main>
 
-    <script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
+        serverTimestamp
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCSNDvrvuwDketbB-AlfFoJQysooJdq6JY",
+        authDomain: "anni-uni.firebaseapp.com",
+        projectId: "anni-uni",
+        storageBucket: "anni-uni.firebasestorage.app",
+        messagingSenderId: "32747088221",
+        appId: "1:32747088221:web:5f239767a260925083a0b4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const entriesRef = collection(db, "entries");
+
       const form = document.getElementById("qa-form");
       const clearAll = document.getElementById("clear-all");
-      const STORAGE_KEY = "qa_entries";
       const CLEAR_PASSWORD = "admin";
 
-      function loadEntries() {
-        try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        } catch {
-          return [];
-        }
-      }
-
-      function saveEntries(entries) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-      }
-
-      form.addEventListener("submit", (event) => {
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const formData = new FormData(form);
         const person = String(formData.get("person")).trim();
@@ -276,17 +287,24 @@
           return;
         }
 
-        const entries = loadEntries();
-        entries.push({ person, question, answer, createdAt: Date.now() });
-        saveEntries(entries);
+        await addDoc(entriesRef, {
+          person,
+          question,
+          answer,
+          createdAt: serverTimestamp()
+        });
         form.reset();
       });
 
-      clearAll.addEventListener("click", () => {
+      clearAll.addEventListener("click", async () => {
         const input = window.prompt("Enter password to clear all answers:");
-        if (input && input === CLEAR_PASSWORD) {
-          saveEntries([]);
+        if (!input || input !== CLEAR_PASSWORD) {
+          return;
         }
+
+        const snapshot = await getDocs(entriesRef);
+        const deletions = snapshot.docs.map((entry) => deleteDoc(doc(db, "entries", entry.id)));
+        await Promise.all(deletions);
       });
     </script>
   </body>

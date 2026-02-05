@@ -168,18 +168,31 @@
       </section>
     </main>
 
-    <script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        query,
+        orderBy,
+        onSnapshot
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCSNDvrvuwDketbB-AlfFoJQysooJdq6JY",
+        authDomain: "anni-uni.firebaseapp.com",
+        projectId: "anni-uni",
+        storageBucket: "anni-uni.firebasestorage.app",
+        messagingSenderId: "32747088221",
+        appId: "1:32747088221:web:5f239767a260925083a0b4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const entriesRef = collection(db, "entries");
+
       const answers = document.getElementById("answers");
       const emptyState = document.getElementById("empty-state");
-      const STORAGE_KEY = "qa_entries";
-
-      function loadEntries() {
-        try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        } catch {
-          return [];
-        }
-      }
 
       function addCard(target, question, answer) {
         const card = document.createElement("article");
@@ -198,10 +211,14 @@
         target.appendChild(card);
       }
 
-      const entries = loadEntries();
-      if (entries.length === 0) {
-        emptyState.style.display = "block";
-      } else {
+      function renderEntries(entries) {
+        answers.innerHTML = "";
+        if (entries.length === 0) {
+          emptyState.style.display = "block";
+          answers.appendChild(emptyState);
+          return;
+        }
+
         emptyState.style.display = "none";
         const byPerson = new Map();
         entries.forEach((entry) => {
@@ -223,6 +240,11 @@
           answers.appendChild(block);
         });
       }
+
+      onSnapshot(query(entriesRef, orderBy("createdAt", "asc")), (snapshot) => {
+        const entries = snapshot.docs.map((docSnap) => docSnap.data());
+        renderEntries(entries);
+      });
     </script>
   </body>
 </html>
