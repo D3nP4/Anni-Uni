@@ -64,7 +64,7 @@
 
       form {
         display: grid;
-        gap: 14px;
+        gap: 18px;
       }
 
       label {
@@ -72,7 +72,8 @@
       }
 
       textarea,
-      input {
+      input,
+      select {
         width: 100%;
         border-radius: 14px;
         border: 1px solid rgba(31, 26, 23, 0.2);
@@ -83,7 +84,8 @@
       }
 
       textarea:focus,
-      input:focus {
+      input:focus,
+      select:focus {
         outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 0 3px var(--ring);
@@ -203,15 +205,11 @@
       <section class="panel">
         <form id="qa-form">
           <div>
-            <label for="question">Frage</label>
-            <input id="question" name="question" type="text" placeholder="Zum Beispiel: Was motiviert dich?" required />
-          </div>
-          <div>
-            <label for="answer">Antwort</label>
-            <textarea id="answer" name="answer" placeholder="Schreibe hier deine Antwort..." required></textarea>
+            <label>Fragen (fest vorgegeben)</label>
+            <div class="question-list" id="question-list"></div>
           </div>
           <div class="actions">
-            <button type="submit">Antwort hinzufügen</button>
+            <button type="submit">Antworten speichern</button>
             <button type="button" class="ghost" id="clear-all">Alles leeren</button>
           </div>
         </form>
@@ -227,8 +225,10 @@
 
     <script>
       const form = document.getElementById("qa-form");
+      const questionList = document.getElementById("question-list");
       const clearAll = document.getElementById("clear-all");
       const STORAGE_KEY = "qa_entries";
+      const QUESTIONS = ["What makes you hapy", "paw?"];
 
       function loadEntries() {
         try {
@@ -242,25 +242,64 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
       }
 
+      function renderQuestions() {
+        const stored = loadEntries();
+        const map = new Map(stored.map((entry) => [entry.question, entry.answer]));
+        QUESTIONS.forEach((question, index) => {
+          const item = document.createElement("div");
+          item.className = "question-item";
+
+          const title = document.createElement("h3");
+          title.textContent = question;
+
+          const textarea = document.createElement("textarea");
+          textarea.name = `answer-${index}`;
+          textarea.placeholder = "Antwort eingeben...";
+          textarea.value = map.get(question) || "";
+          textarea.dataset.question = question;
+
+          item.append(title, textarea);
+          questionList.appendChild(item);
+        });
+      }
+
       form.addEventListener("submit", (event) => {
         event.preventDefault();
-        const formData = new FormData(form);
-        const question = String(formData.get("question")).trim();
-        const answer = String(formData.get("answer")).trim();
-
-        if (!question || !answer) {
-          return;
-        }
-
-        const entries = loadEntries();
-        entries.push({ question, answer, createdAt: Date.now() });
-        saveEntries(entries);
-        form.reset();
+        const answers = [];
+        questionList.querySelectorAll("textarea").forEach((field) => {
+          const answer = field.value.trim();
+          const question = field.dataset.question;
+          if (answer) {
+            answers.push({ question, answer, createdAt: Date.now() });
+          }
+        });
+        saveEntries(answers);
       });
 
       clearAll.addEventListener("click", () => {
         saveEntries([]);
+        questionList.querySelectorAll("textarea").forEach((field) => {
+          field.value = "";
+        });
       });
+
+      renderQuestions();
     </script>
   </body>
 </html>
+      .question-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .question-item {
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 26, 23, 0.1);
+        background: #fffdf8;
+      }
+
+      .question-item h3 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+      }

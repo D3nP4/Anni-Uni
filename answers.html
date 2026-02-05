@@ -156,6 +156,7 @@
       const answers = document.getElementById("answers");
       const emptyState = document.getElementById("empty-state");
       const STORAGE_KEY = "qa_entries";
+      const QUESTIONS = ["What makes you hapy", "paw?"];
 
       function loadEntries() {
         try {
@@ -173,18 +174,22 @@
         title.textContent = question;
 
         const body = document.createElement("p");
-        body.textContent = answer;
+        body.textContent = answer || "Noch keine Antwort.";
+        if (!answer) {
+          body.style.fontStyle = "italic";
+        }
 
         card.append(title, body);
         answers.appendChild(card);
       }
 
       const entries = loadEntries();
-      if (entries.length === 0) {
+      const map = new Map(entries.map((entry) => [entry.question, entry.answer]));
+      if (QUESTIONS.length === 0) {
         emptyState.style.display = "block";
       } else {
         emptyState.style.display = "none";
-        entries.forEach((entry) => addCard(entry.question, entry.answer));
+        QUESTIONS.forEach((question) => addCard(question, map.get(question)));
       }
     </script>
   </body>
