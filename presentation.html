@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Presentation View</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f1e9;
+        --ink: #1f1a17;
+        --muted: #5c524d;
+        --accent: #d46a4f;
+        --accent-dark: #b4533a;
+        --card: #fff7ef;
+        --shadow: rgba(26, 19, 15, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top left, #fff2dd 0%, var(--bg) 55%, #efe6d8 100%);
+        min-height: 100vh;
+      }
+
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 48px 20px 72px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.2rem, 4vw, 3.4rem);
+        margin: 0;
+        letter-spacing: 0.02em;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.1rem;
+      }
+
+      .panel {
+        background: var(--card);
+        border-radius: 22px;
+        box-shadow: 0 18px 40px -26px var(--shadow);
+        padding: 16px 22px;
+        border: 1px solid rgba(31, 26, 23, 0.05);
+        margin-bottom: 22px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      a {
+        color: var(--accent-dark);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .cloud {
+        position: relative;
+        min-height: 520px;
+        border-radius: 28px;
+        background: linear-gradient(140deg, #fff7eb 0%, #f9efe1 45%, #f6ead7 100%);
+        border: 1px solid rgba(31, 26, 23, 0.08);
+        box-shadow: 0 28px 48px -30px var(--shadow);
+        overflow: hidden;
+      }
+
+      .word {
+        position: absolute;
+        font-weight: 700;
+        color: var(--ink);
+        text-shadow: 0 10px 24px rgba(26, 19, 15, 0.1);
+        opacity: 0.95;
+        animation: floatIn 0.6s ease both;
+        white-space: nowrap;
+      }
+
+      .word.accent {
+        color: var(--accent-dark);
+      }
+
+      .empty {
+        text-align: center;
+        color: var(--muted);
+        padding: 18px;
+        border: 1px dashed rgba(31, 26, 23, 0.2);
+        border-radius: 16px;
+        margin-top: 12px;
+      }
+
+      @keyframes floatIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
+        }
+        to {
+          opacity: 0.95;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @media (max-width: 720px) {
+        .cloud {
+          min-height: 420px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>Presentation view</h1>
+        <p>All answers visualized as a word cloud.</p>
+      </section>
+
+      <section class="panel">
+        <span>Go to:</span>
+        <a href="index.html">Enter answers</a>
+        <a href="answers.html" style="margin-left: 12px;">Show answers</a>
+      </section>
+
+      <section class="cloud" id="cloud"></section>
+      <div class="empty" id="empty-state" style="display: none;">No answers to visualize yet.</div>
+    </main>
+
+    <script>
+      const STORAGE_KEY = "qa_entries";
+      const cloud = document.getElementById("cloud");
+      const emptyState = document.getElementById("empty-state");
+
+      const STOPWORDS = new Set([
+        "the",
+        "and",
+        "a",
+        "an",
+        "to",
+        "of",
+        "in",
+        "on",
+        "for",
+        "with",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "i",
+        "you",
+        "he",
+        "she",
+        "it",
+        "we",
+        "they",
+        "me",
+        "my",
+        "your",
+        "our",
+        "their",
+        "this",
+        "that",
+        "these",
+        "those",
+        "as",
+        "at",
+        "by",
+        "from",
+        "or",
+        "but",
+        "if",
+        "then",
+        "so",
+        "not",
+        "no",
+        "yes"
+      ]);
+
+      function loadEntries() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+          return [];
+        }
+      }
+
+      function tokenize(text) {
+        return text
+          .toLowerCase()
+          .replace(/[^a-z0-9\s']/g, " ")
+          .split(/\s+/)
+          .map((word) => word.trim())
+          .filter((word) => word && !STOPWORDS.has(word));
+      }
+
+      function buildFrequency(entries) {
+        const counts = new Map();
+        entries.forEach((entry) => {
+          tokenize(entry.answer || "").forEach((word) => {
+            counts.set(word, (counts.get(word) || 0) + 1);
+          });
+        });
+        return Array.from(counts.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 70);
+      }
+
+      function placeWord(wordEl, bounds) {
+        const centerX = bounds.width / 2;
+        const centerY = bounds.height / 2;
+        const maxRadius = Math.min(centerX, centerY) - 20;
+        const placed = Array.from(cloud.querySelectorAll(".word")).map((el) => el.getBoundingClientRect());
+
+        const tempRect = wordEl.getBoundingClientRect();
+        const w = tempRect.width;
+        const h = tempRect.height;
+
+        for (let i = 0; i < 220; i += 1) {
+          const angle = i * 0.35;
+          const radius = Math.min(maxRadius, 6 + i * 1.4);
+          const x = centerX + Math.cos(angle) * radius - w / 2;
+          const y = centerY + Math.sin(angle) * radius - h / 2;
+
+          const rect = {
+            left: bounds.left + x,
+            top: bounds.top + y,
+            right: bounds.left + x + w,
+            bottom: bounds.top + y + h
+          };
+
+          const overlaps = placed.some(
+            (p) => !(rect.right < p.left || rect.left > p.right || rect.bottom < p.top || rect.top > p.bottom)
+          );
+
+          if (!overlaps && x > 4 && y > 4 && x + w < bounds.width - 4 && y + h < bounds.height - 4) {
+            wordEl.style.left = `${x}px`;
+            wordEl.style.top = `${y}px`;
+            return;
+          }
+        }
+
+        wordEl.style.left = `${Math.random() * (bounds.width - w)}px`;
+        wordEl.style.top = `${Math.random() * (bounds.height - h)}px`;
+      }
+
+      function renderCloud() {
+        const entries = loadEntries();
+        const freq = buildFrequency(entries);
+
+        if (freq.length === 0) {
+          emptyState.style.display = "block";
+          return;
+        }
+
+        const values = freq.map((item) => item[1]);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+
+        const bounds = cloud.getBoundingClientRect();
+
+        freq.forEach(([word, count], index) => {
+          const size = max === min ? 22 : 18 + ((count - min) / (max - min)) * 34;
+          const span = document.createElement("span");
+          span.className = `word${index % 4 === 0 ? " accent" : ""}`;
+          span.style.fontSize = `${size}px`;
+          span.style.transform = `rotate(${(index % 6 - 3) * 3}deg)`;
+          span.textContent = word;
+          span.style.visibility = "hidden";
+          cloud.appendChild(span);
+          span.getBoundingClientRect();
+          span.style.visibility = "visible";
+          placeWord(span, bounds);
+        });
+      }
+
+      renderCloud();
+      window.addEventListener("resize", () => {
+        cloud.innerHTML = "";
+        renderCloud();
+      });
+    </script>
+  </body>
+</html>

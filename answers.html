@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Antworten anzeigen</title>
+    <title>Show Answers</title>
     <style>
       :root {
         color-scheme: light;
@@ -138,17 +138,18 @@
   <body>
     <main class="page">
       <section class="hero">
-        <h1>Antworten anzeigen</h1>
-        <p>Hier findest du alle gespeicherten Fragen und Antworten.</p>
+        <h1>Show answers</h1>
+        <p>All saved questions and answers in one place.</p>
       </section>
 
       <section class="panel">
-        <span>Zur Eingabeseite:</span>
-        <a href="index.html">Fragen eingeben</a>
+        <span>Go to:</span>
+        <a href="index.html">Enter answers</a>
+        <a href="presentation.html" style="margin-left: 12px;">Presentation view</a>
       </section>
 
       <section class="answers" id="answers">
-        <div class="empty" id="empty-state">Noch keine Antworten gespeichert.</div>
+        <div class="empty" id="empty-state">No answers saved yet.</div>
       </section>
     </main>
 
@@ -174,7 +175,7 @@
         title.textContent = question;
 
         const body = document.createElement("p");
-        body.textContent = answer || "Noch keine Antwort.";
+        body.textContent = answer || "No answer yet.";
         if (!answer) {
           body.style.fontStyle = "italic";
         }

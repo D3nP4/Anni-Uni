@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Fragen eingeben</title>
+    <title>Enter Answers</title>
     <style>
       :root {
         color-scheme: light;
@@ -102,6 +102,23 @@
         gap: 12px;
       }
 
+      .question-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .question-item {
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 26, 23, 0.1);
+        background: #fffdf8;
+      }
+
+      .question-item h3 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+      }
+
       button {
         border: none;
         border-radius: 999px;
@@ -198,27 +215,30 @@
   <body>
     <main class="page">
       <section class="hero">
-        <h1>Fragen eingeben</h1>
-        <p>Gib deine Frage und Antwort ein. Die Sammlung siehst du auf der Anzeigeseite.</p>
+        <h1>Enter your answers</h1>
+        <p>Answer the fixed questions. View the collection on the answers page.</p>
       </section>
 
       <section class="panel">
         <form id="qa-form">
           <div>
-            <label>Fragen (fest vorgegeben)</label>
+            <label>Questions (fixed list)</label>
             <div class="question-list" id="question-list"></div>
           </div>
           <div class="actions">
-            <button type="submit">Antworten speichern</button>
-            <button type="button" class="ghost" id="clear-all">Alles leeren</button>
+            <button type="submit">Save answers</button>
+            <button type="button" class="ghost" id="clear-all">Clear all</button>
           </div>
         </form>
       </section>
 
       <section class="panel" style="margin-top: 22px;">
-        <strong>Zur Anzeige:</strong>
+        <strong>View:</strong>
         <a href="answers.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 6px;">
-          Antworten anzeigen
+          Show answers
+        </a>
+        <a href="presentation.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">
+          Presentation view
         </a>
       </section>
     </main>
@@ -254,7 +274,7 @@
 
           const textarea = document.createElement("textarea");
           textarea.name = `answer-${index}`;
-          textarea.placeholder = "Antwort eingeben...";
+          textarea.placeholder = "Type your answer...";
           textarea.value = map.get(question) || "";
           textarea.dataset.question = question;
 
@@ -287,19 +307,3 @@
     </script>
   </body>
 </html>
-      .question-list {
-        display: grid;
-        gap: 14px;
-      }
-
-      .question-item {
-        padding: 14px 16px;
-        border-radius: 16px;
-        border: 1px solid rgba(31, 26, 23, 0.1);
-        background: #fffdf8;
-      }
-
-      .question-item h3 {
-        margin: 0 0 8px;
-        font-size: 1.05rem;
-      }
