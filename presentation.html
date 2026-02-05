@@ -72,17 +72,20 @@
       }
 
       .cloud {
-        position: relative;
-        min-height: 520px;
-        border-radius: 28px;
+        min-height: 220px;
+        border-radius: 20px;
         background: linear-gradient(140deg, #fff7eb 0%, #f9efe1 45%, #f6ead7 100%);
         border: 1px solid rgba(31, 26, 23, 0.08);
-        box-shadow: 0 28px 48px -30px var(--shadow);
-        overflow: hidden;
+        box-shadow: 0 22px 42px -32px var(--shadow);
+        padding: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        align-content: flex-start;
       }
 
       .word {
-        position: absolute;
+        position: relative;
         font-weight: 700;
         color: var(--ink);
         text-shadow: 0 10px 24px rgba(26, 19, 15, 0.1);
@@ -106,11 +109,6 @@
       .question-block h2 {
         margin: 0 0 14px;
         font-size: 1.25rem;
-      }
-
-      .cloud.small {
-        min-height: 240px;
-        border-radius: 20px;
       }
 
       .clouds-grid {
@@ -291,44 +289,6 @@
           .slice(0, 70);
       }
 
-      function placeWord(container, wordEl, bounds) {
-        const centerX = bounds.width / 2;
-        const centerY = bounds.height / 2;
-        const maxRadius = Math.min(centerX, centerY) - 20;
-        const placed = Array.from(container.querySelectorAll(".word")).map((el) => el.getBoundingClientRect());
-
-        const tempRect = wordEl.getBoundingClientRect();
-        const w = tempRect.width;
-        const h = tempRect.height;
-
-        for (let i = 0; i < 220; i += 1) {
-          const angle = i * 0.35;
-          const radius = Math.min(maxRadius, 6 + i * 1.4);
-          const x = centerX + Math.cos(angle) * radius - w / 2;
-          const y = centerY + Math.sin(angle) * radius - h / 2;
-
-          const rect = {
-            left: bounds.left + x,
-            top: bounds.top + y,
-            right: bounds.left + x + w,
-            bottom: bounds.top + y + h
-          };
-
-          const overlaps = placed.some(
-            (p) => !(rect.right < p.left || rect.left > p.right || rect.bottom < p.top || rect.top > p.bottom)
-          );
-
-          if (!overlaps && x > 4 && y > 4 && x + w < bounds.width - 4 && y + h < bounds.height - 4) {
-            wordEl.style.left = `${x}px`;
-            wordEl.style.top = `${y}px`;
-            return;
-          }
-        }
-
-        wordEl.style.left = `${Math.random() * (bounds.width - w)}px`;
-        wordEl.style.top = `${Math.random() * (bounds.height - h)}px`;
-      }
-
       function renderWordCloud(container, entries) {
         const freq = buildFrequency(entries);
         container.innerHTML = "";
@@ -345,20 +305,13 @@
         const min = Math.min(...values);
         const max = Math.max(...values);
 
-        const bounds = container.getBoundingClientRect();
-
         freq.forEach(([word, count], index) => {
-          const size = max === min ? 22 : 18 + ((count - min) / (max - min)) * 34;
+          const size = max === min ? 22 : 16 + ((count - min) / (max - min)) * 26;
           const span = document.createElement("span");
           span.className = `word${index % 4 === 0 ? " accent" : ""}`;
           span.style.fontSize = `${size}px`;
-          span.style.transform = `rotate(${(index % 6 - 3) * 3}deg)`;
           span.textContent = word;
-          span.style.visibility = "hidden";
           container.appendChild(span);
-          span.getBoundingClientRect();
-          span.style.visibility = "visible";
-          placeWord(container, span, bounds);
         });
       }
 
@@ -397,7 +350,7 @@
             block.appendChild(title);
 
             const cloud = document.createElement("div");
-            cloud.className = "cloud small";
+            cloud.className = "cloud";
             block.appendChild(cloud);
 
             const data = grouped.get(question) || [];
