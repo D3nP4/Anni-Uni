@@ -95,6 +95,25 @@
         color: var(--accent-dark);
       }
 
+      .question-block {
+        margin-top: 24px;
+        padding: 18px;
+        border-radius: 22px;
+        background: #fff6ea;
+        border: 1px solid rgba(31, 26, 23, 0.08);
+        box-shadow: 0 16px 30px -24px var(--shadow);
+      }
+
+      .question-block h2 {
+        margin: 0 0 14px;
+        font-size: 1.25rem;
+      }
+
+      .cloud.small {
+        min-height: 300px;
+        border-radius: 20px;
+      }
+
       .empty {
         text-align: center;
         color: var(--muted);
@@ -135,7 +154,7 @@
         <a href="answers.html" style="margin-left: 12px;">Show answers</a>
       </section>
 
-      <section class="cloud" id="cloud"></section>
+      <section id="clouds"></section>
       <div class="empty" id="empty-state" style="display: none;">No answers to visualize yet.</div>
     </main>
 
@@ -163,8 +182,9 @@
       const entriesRef = collection(db, "entries");
 
       const VIEW_PASSWORD = "admin";
-      const cloud = document.getElementById("cloud");
+      const clouds = document.getElementById("clouds");
       const emptyState = document.getElementById("empty-state");
+      const QUESTIONS = ["what makes you happy?", "how cute is laika?"];
 
       const STOPWORDS = new Set([
         "the",
@@ -273,6 +293,39 @@
         wordEl.style.top = `${Math.random() * (bounds.height - h)}px`;
       }
 
+      function renderWordCloud(container, entries) {
+        const freq = buildFrequency(entries);
+        container.innerHTML = "";
+
+        if (freq.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "No answers yet.";
+          container.appendChild(empty);
+          return;
+        }
+
+        const values = freq.map((item) => item[1]);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+
+        const bounds = container.getBoundingClientRect();
+
+        freq.forEach(([word, count], index) => {
+          const size = max === min ? 22 : 18 + ((count - min) / (max - min)) * 34;
+          const span = document.createElement("span");
+          span.className = `word${index % 4 === 0 ? " accent" : ""}`;
+          span.style.fontSize = `${size}px`;
+          span.style.transform = `rotate(${(index % 6 - 3) * 3}deg)`;
+          span.textContent = word;
+          span.style.visibility = "hidden";
+          container.appendChild(span);
+          span.getBoundingClientRect();
+          span.style.visibility = "visible";
+          placeWord(span, bounds);
+        });
+      }
+
       async function renderCloud() {
         const input = window.prompt("Enter password to view presentation:");
         if (!input || input !== VIEW_PASSWORD) {
@@ -283,40 +336,47 @@
 
         onSnapshot(query(entriesRef, orderBy("createdAt", "asc")), (snapshot) => {
           const entries = snapshot.docs.map((docSnap) => docSnap.data());
-          const freq = buildFrequency(entries);
-          cloud.innerHTML = "";
-
-          if (freq.length === 0) {
+          clouds.innerHTML = "";
+          if (entries.length === 0) {
             emptyState.style.display = "block";
             return;
           }
 
           emptyState.style.display = "none";
-          const values = freq.map((item) => item[1]);
-          const min = Math.min(...values);
-          const max = Math.max(...values);
 
-          const bounds = cloud.getBoundingClientRect();
+          const grouped = new Map();
+          entries.forEach((entry) => {
+            if (!grouped.has(entry.question)) {
+              grouped.set(entry.question, []);
+            }
+            grouped.get(entry.question).push(entry);
+          });
 
-          freq.forEach(([word, count], index) => {
-            const size = max === min ? 22 : 18 + ((count - min) / (max - min)) * 34;
-            const span = document.createElement("span");
-            span.className = `word${index % 4 === 0 ? " accent" : ""}`;
-            span.style.fontSize = `${size}px`;
-            span.style.transform = `rotate(${(index % 6 - 3) * 3}deg)`;
-            span.textContent = word;
-            span.style.visibility = "hidden";
-            cloud.appendChild(span);
-            span.getBoundingClientRect();
-            span.style.visibility = "visible";
-            placeWord(span, bounds);
+          QUESTIONS.forEach((question) => {
+            const block = document.createElement("section");
+            block.className = "question-block";
+
+            const title = document.createElement("h2");
+            title.textContent = question;
+            block.appendChild(title);
+
+            const cloud = document.createElement("div");
+            cloud.className = "cloud small";
+            block.appendChild(cloud);
+
+            const data = grouped.get(question) || [];
+            renderWordCloud(
+              cloud,
+              data.map((entry) => ({ answer: entry.answer }))
+            );
+
+            clouds.appendChild(block);
           });
         });
       }
 
       renderCloud();
       window.addEventListener("resize", () => {
-        cloud.innerHTML = "";
         renderCloud();
       });
     </script>
