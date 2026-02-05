@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anonymous Chat</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f1e9;
+        --ink: #1f1a17;
+        --muted: #5c524d;
+        --accent: #d46a4f;
+        --accent-dark: #b4533a;
+        --card: #fff7ef;
+        --shadow: rgba(26, 19, 15, 0.14);
+        --ring: rgba(212, 106, 79, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top left, #fff2dd 0%, var(--bg) 55%, #efe6d8 100%);
+        min-height: 100vh;
+        display: grid;
+      }
+
+      .page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 40px 20px 32px;
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3rem);
+        letter-spacing: 0.02em;
+      }
+
+      .hero p {
+        margin: 6px 0 0;
+        color: var(--muted);
+      }
+
+      .panel {
+        background: var(--card);
+        border-radius: 22px;
+        box-shadow: 0 18px 40px -26px var(--shadow);
+        padding: 12px 18px;
+        border: 1px solid rgba(31, 26, 23, 0.05);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      a {
+        color: var(--accent-dark);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .chat {
+        background: #fffdf8;
+        border-radius: 26px;
+        border: 1px solid rgba(31, 26, 23, 0.08);
+        box-shadow: inset 0 0 0 1px rgba(31, 26, 23, 0.02);
+        padding: 18px;
+        overflow: auto;
+        min-height: 360px;
+        max-height: 60vh;
+        display: grid;
+        gap: 12px;
+      }
+
+      .bubble {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        background: #fff3e4;
+        border: 1px solid rgba(31, 26, 23, 0.1);
+        box-shadow: 0 12px 24px -20px var(--shadow);
+        justify-self: start;
+        line-height: 1.5;
+        word-break: break-word;
+      }
+
+      .bubble:nth-child(2n) {
+        background: #fef7ef;
+        justify-self: end;
+      }
+
+      .timestamp {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+      }
+
+      textarea {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 26, 23, 0.2);
+        padding: 12px 14px;
+        font-size: 1rem;
+        background: #fffdf9;
+        resize: none;
+        min-height: 54px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--ring);
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--accent);
+        color: #fffaf6;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 12px 22px -16px var(--shadow);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        background: var(--accent-dark);
+      }
+
+      .empty {
+        color: var(--muted);
+        text-align: center;
+        padding: 24px 12px;
+        border: 1px dashed rgba(31, 26, 23, 0.2);
+        border-radius: 16px;
+      }
+
+      @media (max-width: 700px) {
+        form {
+          grid-template-columns: 1fr;
+        }
+
+        button {
+          width: 100%;
+        }
+
+        .bubble {
+          max-width: 90%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>Anonymous chat</h1>
+        <p>Write a message below. It appears instantly in the chat, without a name.</p>
+      </section>
+
+      <section class="panel">
+        <span>Go to:</span>
+        <a href="index.html">Enter answers</a>
+        <a href="answers.html">Show answers</a>
+        <a href="presentation.html">Presentation view</a>
+      </section>
+
+      <section class="chat" id="chat">
+        <div class="empty" id="empty-state">No messages yet.</div>
+      </section>
+
+      <form id="chat-form">
+        <textarea id="message" name="message" placeholder="Type your message..." required></textarea>
+        <button type="submit">Send</button>
+      </form>
+    </main>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        serverTimestamp,
+        query,
+        orderBy,
+        onSnapshot
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCSNDvrvuwDketbB-AlfFoJQysooJdq6JY",
+        authDomain: "anni-uni.firebaseapp.com",
+        projectId: "anni-uni",
+        storageBucket: "anni-uni.firebasestorage.app",
+        messagingSenderId: "32747088221",
+        appId: "1:32747088221:web:5f239767a260925083a0b4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const messagesRef = collection(db, "chat_messages");
+
+      const chat = document.getElementById("chat");
+      const emptyState = document.getElementById("empty-state");
+      const form = document.getElementById("chat-form");
+      const messageInput = document.getElementById("message");
+
+      function formatTime(value) {
+        if (!value) return "";
+        const date = value.toDate ? value.toDate() : new Date(value);
+        return date.toLocaleString();
+      }
+
+      function addBubble(text, createdAt) {
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = text;
+
+        const time = document.createElement("span");
+        time.className = "timestamp";
+        time.textContent = formatTime(createdAt);
+        bubble.appendChild(time);
+
+        chat.appendChild(bubble);
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const text = messageInput.value.trim();
+        if (!text) {
+          return;
+        }
+
+        await addDoc(messagesRef, {
+          text,
+          createdAt: serverTimestamp()
+        });
+        messageInput.value = "";
+      });
+
+      onSnapshot(query(messagesRef, orderBy("createdAt", "asc")), (snapshot) => {
+        chat.innerHTML = "";
+        const docs = snapshot.docs.map((docSnap) => docSnap.data());
+        if (docs.length === 0) {
+          emptyState.style.display = "block";
+          chat.appendChild(emptyState);
+          return;
+        }
+
+        emptyState.style.display = "none";
+        docs.forEach((entry) => addBubble(entry.text, entry.createdAt));
+        chat.scrollTop = chat.scrollHeight;
+      });
+    </script>
+  </body>
+</html>
