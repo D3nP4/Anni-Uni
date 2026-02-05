@@ -77,6 +77,21 @@
         gap: 18px;
       }
 
+      .person-block {
+        padding: 16px 18px;
+        border-radius: 20px;
+        background: #fff6ea;
+        border: 1px solid rgba(31, 26, 23, 0.08);
+        box-shadow: 0 16px 30px -24px var(--shadow);
+        display: grid;
+        gap: 14px;
+      }
+
+      .person-block h2 {
+        margin: 0;
+        font-size: 1.15rem;
+      }
+
       .answer-card {
         padding: 20px 22px;
         border-radius: 18px;
@@ -139,7 +154,7 @@
     <main class="page">
       <section class="hero">
         <h1>Show answers</h1>
-        <p>All saved questions and answers in one place.</p>
+        <p>All saved questions and answers grouped by person.</p>
       </section>
 
       <section class="panel">
@@ -157,7 +172,6 @@
       const answers = document.getElementById("answers");
       const emptyState = document.getElementById("empty-state");
       const STORAGE_KEY = "qa_entries";
-      const QUESTIONS = ["What makes you hapy", "paw?"];
 
       function loadEntries() {
         try {
@@ -167,7 +181,7 @@
         }
       }
 
-      function addCard(question, answer) {
+      function addCard(target, question, answer) {
         const card = document.createElement("article");
         card.className = "answer-card";
 
@@ -181,16 +195,33 @@
         }
 
         card.append(title, body);
-        answers.appendChild(card);
+        target.appendChild(card);
       }
 
       const entries = loadEntries();
-      const map = new Map(entries.map((entry) => [entry.question, entry.answer]));
-      if (QUESTIONS.length === 0) {
+      if (entries.length === 0) {
         emptyState.style.display = "block";
       } else {
         emptyState.style.display = "none";
-        QUESTIONS.forEach((question) => addCard(question, map.get(question)));
+        const byPerson = new Map();
+        entries.forEach((entry) => {
+          if (!byPerson.has(entry.person)) {
+            byPerson.set(entry.person, []);
+          }
+          byPerson.get(entry.person).push(entry);
+        });
+
+        Array.from(byPerson.entries()).forEach(([person, personEntries]) => {
+          const block = document.createElement("section");
+          block.className = "person-block";
+
+          const header = document.createElement("h2");
+          header.textContent = person;
+          block.appendChild(header);
+
+          personEntries.forEach((entry) => addCard(block, entry.question, entry.answer));
+          answers.appendChild(block);
+        });
       }
     </script>
   </body>

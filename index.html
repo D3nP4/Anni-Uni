@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Enter Answers</title>
+    <title>Answer Questions</title>
     <style>
       :root {
         color-scheme: light;
@@ -102,21 +102,15 @@
         gap: 12px;
       }
 
-      .question-list {
+      .two-col {
         display: grid;
         gap: 14px;
       }
 
-      .question-item {
-        padding: 14px 16px;
-        border-radius: 16px;
-        border: 1px solid rgba(31, 26, 23, 0.1);
-        background: #fffdf8;
-      }
-
-      .question-item h3 {
-        margin: 0 0 8px;
-        font-size: 1.05rem;
+      @media (min-width: 760px) {
+        .two-col {
+          grid-template-columns: 1fr 1fr;
+        }
       }
 
       button {
@@ -215,19 +209,29 @@
   <body>
     <main class="page">
       <section class="hero">
-        <h1>Enter your answers</h1>
-        <p>Answer the fixed questions. View the collection on the answers page.</p>
+        <h1>Answer questions</h1>
+        <p>Add questions and answers from multiple people. View everything on the answers page.</p>
       </section>
 
       <section class="panel">
         <form id="qa-form">
+          <div class="two-col">
+            <div>
+              <label for="person">Person</label>
+              <input id="person" name="person" type="text" placeholder="Name" required />
+            </div>
+            <div>
+              <label for="question">Question</label>
+              <input id="question" name="question" type="text" placeholder="Type a question..." required />
+            </div>
+          </div>
           <div>
-            <label>Questions (fixed list)</label>
-            <div class="question-list" id="question-list"></div>
+            <label for="answer">Answer</label>
+            <textarea id="answer" name="answer" placeholder="Type your answer..." required></textarea>
           </div>
           <div class="actions">
-            <button type="submit">Save answers</button>
-            <button type="button" class="ghost" id="clear-all">Clear all</button>
+            <button type="submit">Save answer</button>
+            <button type="button" class="ghost" id="clear-all">Clear all (password)</button>
           </div>
         </form>
       </section>
@@ -245,10 +249,9 @@
 
     <script>
       const form = document.getElementById("qa-form");
-      const questionList = document.getElementById("question-list");
       const clearAll = document.getElementById("clear-all");
       const STORAGE_KEY = "qa_entries";
-      const QUESTIONS = ["What makes you hapy", "paw?"];
+      const CLEAR_PASSWORD = "admin";
 
       function loadEntries() {
         try {
@@ -262,48 +265,29 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
       }
 
-      function renderQuestions() {
-        const stored = loadEntries();
-        const map = new Map(stored.map((entry) => [entry.question, entry.answer]));
-        QUESTIONS.forEach((question, index) => {
-          const item = document.createElement("div");
-          item.className = "question-item";
-
-          const title = document.createElement("h3");
-          title.textContent = question;
-
-          const textarea = document.createElement("textarea");
-          textarea.name = `answer-${index}`;
-          textarea.placeholder = "Type your answer...";
-          textarea.value = map.get(question) || "";
-          textarea.dataset.question = question;
-
-          item.append(title, textarea);
-          questionList.appendChild(item);
-        });
-      }
-
       form.addEventListener("submit", (event) => {
         event.preventDefault();
-        const answers = [];
-        questionList.querySelectorAll("textarea").forEach((field) => {
-          const answer = field.value.trim();
-          const question = field.dataset.question;
-          if (answer) {
-            answers.push({ question, answer, createdAt: Date.now() });
-          }
-        });
-        saveEntries(answers);
+        const formData = new FormData(form);
+        const person = String(formData.get("person")).trim();
+        const question = String(formData.get("question")).trim();
+        const answer = String(formData.get("answer")).trim();
+
+        if (!person || !question || !answer) {
+          return;
+        }
+
+        const entries = loadEntries();
+        entries.push({ person, question, answer, createdAt: Date.now() });
+        saveEntries(entries);
+        form.reset();
       });
 
       clearAll.addEventListener("click", () => {
-        saveEntries([]);
-        questionList.querySelectorAll("textarea").forEach((field) => {
-          field.value = "";
-        });
+        const input = window.prompt("Enter password to clear all answers:");
+        if (input && input === CLEAR_PASSWORD) {
+          saveEntries([]);
+        }
       });
-
-      renderQuestions();
     </script>
   </body>
 </html>

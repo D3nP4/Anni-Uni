@@ -141,6 +141,7 @@
 
     <script>
       const STORAGE_KEY = "qa_entries";
+      const VIEW_PASSWORD = "admin";
       const cloud = document.getElementById("cloud");
       const emptyState = document.getElementById("empty-state");
 
@@ -260,6 +261,13 @@
       }
 
       function renderCloud() {
+        const input = window.prompt("Enter password to view presentation:");
+        if (!input || input !== VIEW_PASSWORD) {
+          emptyState.style.display = "block";
+          emptyState.textContent = "Password required.";
+          return;
+        }
+
         const entries = loadEntries();
         const freq = buildFrequency(entries);
 
