@@ -77,7 +77,7 @@
         gap: 18px;
       }
 
-      .person-block {
+      .question-block {
         padding: 16px 18px;
         border-radius: 20px;
         background: #fff6ea;
@@ -87,9 +87,15 @@
         gap: 14px;
       }
 
-      .person-block h2 {
+      .question-block h2 {
         margin: 0;
         font-size: 1.15rem;
+      }
+
+      .answer-line {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
       }
 
       .answer-card {
@@ -154,7 +160,7 @@
     <main class="page">
       <section class="hero">
         <h1>Show answers</h1>
-        <p>All saved questions and answers grouped by person.</p>
+        <p>All saved questions and answers grouped by question.</p>
       </section>
 
       <section class="panel">
@@ -190,25 +196,16 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const entriesRef = collection(db, "entries");
+      const QUESTIONS = ["what makes you happy?", "how cute is laika?"];
 
       const answers = document.getElementById("answers");
       const emptyState = document.getElementById("empty-state");
 
-      function addCard(target, question, answer) {
-        const card = document.createElement("article");
-        card.className = "answer-card";
-
-        const title = document.createElement("h3");
-        title.textContent = question;
-
-        const body = document.createElement("p");
-        body.textContent = answer || "No answer yet.";
-        if (!answer) {
-          body.style.fontStyle = "italic";
-        }
-
-        card.append(title, body);
-        target.appendChild(card);
+      function addAnswerLine(target, answer) {
+        const line = document.createElement("p");
+        line.className = "answer-line";
+        line.textContent = answer;
+        target.appendChild(line);
       }
 
       function renderEntries(entries) {
@@ -220,23 +217,33 @@
         }
 
         emptyState.style.display = "none";
-        const byPerson = new Map();
+        const byQuestion = new Map();
         entries.forEach((entry) => {
-          if (!byPerson.has(entry.person)) {
-            byPerson.set(entry.person, []);
+          if (!byQuestion.has(entry.question)) {
+            byQuestion.set(entry.question, []);
           }
-          byPerson.get(entry.person).push(entry);
+          byQuestion.get(entry.question).push(entry);
         });
 
-        Array.from(byPerson.entries()).forEach(([person, personEntries]) => {
+        QUESTIONS.forEach((question) => {
           const block = document.createElement("section");
-          block.className = "person-block";
+          block.className = "question-block";
 
           const header = document.createElement("h2");
-          header.textContent = person;
+          header.textContent = question;
           block.appendChild(header);
 
-          personEntries.forEach((entry) => addCard(block, entry.question, entry.answer));
+          const answersForQuestion = byQuestion.get(question) || [];
+          if (answersForQuestion.length === 0) {
+            const empty = document.createElement("p");
+            empty.className = "answer-line";
+            empty.style.fontStyle = "italic";
+            empty.textContent = "No answers yet.";
+            block.appendChild(empty);
+          } else {
+            answersForQuestion.forEach((entry) => addAnswerLine(block, entry.answer));
+          }
+
           answers.appendChild(block);
         });
       }

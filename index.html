@@ -102,15 +102,21 @@
         gap: 12px;
       }
 
-      .two-col {
+      .question-list {
         display: grid;
         gap: 14px;
       }
 
-      @media (min-width: 760px) {
-        .two-col {
-          grid-template-columns: 1fr 1fr;
-        }
+      .question-item {
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 26, 23, 0.1);
+        background: #fffdf8;
+      }
+
+      .question-item h3 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
       }
 
       button {
@@ -210,27 +216,17 @@
     <main class="page">
       <section class="hero">
         <h1>Answer questions</h1>
-        <p>Add questions and answers from multiple people. View everything on the answers page.</p>
+        <p>Answer the fixed questions. View everything on the answers page.</p>
       </section>
 
       <section class="panel">
         <form id="qa-form">
-          <div class="two-col">
-            <div>
-              <label for="person">Person</label>
-              <input id="person" name="person" type="text" placeholder="Name" required />
-            </div>
-            <div>
-              <label for="question">Question</label>
-              <input id="question" name="question" type="text" placeholder="Type a question..." required />
-            </div>
-          </div>
           <div>
-            <label for="answer">Answer</label>
-            <textarea id="answer" name="answer" placeholder="Type your answer..." required></textarea>
+            <label>Questions (fixed list)</label>
+            <div class="question-list" id="question-list"></div>
           </div>
           <div class="actions">
-            <button type="submit">Save answer</button>
+            <button type="submit">Save answers</button>
             <button type="button" class="ghost" id="clear-all">Clear all (password)</button>
           </div>
         </form>
@@ -273,27 +269,54 @@
       const entriesRef = collection(db, "entries");
 
       const form = document.getElementById("qa-form");
+      const questionList = document.getElementById("question-list");
       const clearAll = document.getElementById("clear-all");
       const CLEAR_PASSWORD = "admin";
+      const QUESTIONS = ["what makes you happy?", "how cute is laika?"];
+
+      function renderQuestions() {
+        QUESTIONS.forEach((question, index) => {
+          const item = document.createElement("div");
+          item.className = "question-item";
+
+          const title = document.createElement("h3");
+          title.textContent = question;
+
+          const textarea = document.createElement("textarea");
+          textarea.name = `answer-${index}`;
+          textarea.placeholder = "Type your answer...";
+          textarea.dataset.question = question;
+
+          item.append(title, textarea);
+          questionList.appendChild(item);
+        });
+      }
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const formData = new FormData(form);
-        const person = String(formData.get("person")).trim();
-        const question = String(formData.get("question")).trim();
-        const answer = String(formData.get("answer")).trim();
+        const saves = [];
+        questionList.querySelectorAll("textarea").forEach((field) => {
+          const answer = field.value.trim();
+          const question = field.dataset.question;
+          if (answer) {
+            saves.push(
+              addDoc(entriesRef, {
+                question,
+                answer,
+                createdAt: serverTimestamp()
+              })
+            );
+          }
+        });
 
-        if (!person || !question || !answer) {
+        if (saves.length === 0) {
           return;
         }
 
-        await addDoc(entriesRef, {
-          person,
-          question,
-          answer,
-          createdAt: serverTimestamp()
+        await Promise.all(saves);
+        questionList.querySelectorAll("textarea").forEach((field) => {
+          field.value = "";
         });
-        form.reset();
       });
 
       clearAll.addEventListener("click", async () => {
@@ -306,6 +329,8 @@
         const deletions = snapshot.docs.map((entry) => deleteDoc(doc(db, "entries", entry.id)));
         await Promise.all(deletions);
       });
+
+      renderQuestions();
     </script>
   </body>
 </html>
