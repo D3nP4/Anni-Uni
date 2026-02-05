@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Antworten anzeigen</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f1e9;
+        --ink: #1f1a17;
+        --muted: #5c524d;
+        --accent: #d46a4f;
+        --accent-dark: #b4533a;
+        --card: #fff7ef;
+        --shadow: rgba(26, 19, 15, 0.14);
+        --ring: rgba(212, 106, 79, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top left, #fff2dd 0%, var(--bg) 55%, #efe6d8 100%);
+        min-height: 100vh;
+      }
+
+      .page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 48px 20px 72px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.2rem, 4vw, 3.4rem);
+        margin: 0;
+        letter-spacing: 0.02em;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.1rem;
+      }
+
+      .panel {
+        background: var(--card);
+        border-radius: 22px;
+        box-shadow: 0 18px 40px -26px var(--shadow);
+        padding: 18px 22px;
+        border: 1px solid rgba(31, 26, 23, 0.05);
+        margin-bottom: 22px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      a {
+        color: var(--accent-dark);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .answers {
+        display: grid;
+        gap: 18px;
+      }
+
+      .answer-card {
+        padding: 20px 22px;
+        border-radius: 18px;
+        background: #fffdf8;
+        border: 1px solid rgba(31, 26, 23, 0.08);
+        box-shadow: 0 16px 30px -24px var(--shadow);
+        position: relative;
+        animation: fadeUp 0.5s ease both;
+      }
+
+      .answer-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.2rem;
+      }
+
+      .answer-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .answer-card::after {
+        content: "";
+        position: absolute;
+        inset: 12px 12px auto auto;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        opacity: 0.5;
+      }
+
+      .empty {
+        text-align: center;
+        color: var(--muted);
+        padding: 18px;
+        border: 1px dashed rgba(31, 26, 23, 0.2);
+        border-radius: 16px;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 680px) {
+        .page {
+          padding: 32px 16px 60px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>Antworten anzeigen</h1>
+        <p>Hier findest du alle gespeicherten Fragen und Antworten.</p>
+      </section>
+
+      <section class="panel">
+        <span>Zur Eingabeseite:</span>
+        <a href="index.html">Fragen eingeben</a>
+      </section>
+
+      <section class="answers" id="answers">
+        <div class="empty" id="empty-state">Noch keine Antworten gespeichert.</div>
+      </section>
+    </main>
+
+    <script>
+      const answers = document.getElementById("answers");
+      const emptyState = document.getElementById("empty-state");
+      const STORAGE_KEY = "qa_entries";
+
+      function loadEntries() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+          return [];
+        }
+      }
+
+      function addCard(question, answer) {
+        const card = document.createElement("article");
+        card.className = "answer-card";
+
+        const title = document.createElement("h3");
+        title.textContent = question;
+
+        const body = document.createElement("p");
+        body.textContent = answer;
+
+        card.append(title, body);
+        answers.appendChild(card);
+      }
+
+      const entries = loadEntries();
+      if (entries.length === 0) {
+        emptyState.style.display = "block";
+      } else {
+        emptyState.style.display = "none";
+        entries.forEach((entry) => addCard(entry.question, entry.answer));
+      }
+    </script>
+  </body>
+</html>
