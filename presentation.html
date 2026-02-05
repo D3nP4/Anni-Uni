@@ -255,11 +255,11 @@
           .slice(0, 70);
       }
 
-      function placeWord(wordEl, bounds) {
+      function placeWord(container, wordEl, bounds) {
         const centerX = bounds.width / 2;
         const centerY = bounds.height / 2;
         const maxRadius = Math.min(centerX, centerY) - 20;
-        const placed = Array.from(cloud.querySelectorAll(".word")).map((el) => el.getBoundingClientRect());
+        const placed = Array.from(container.querySelectorAll(".word")).map((el) => el.getBoundingClientRect());
 
         const tempRect = wordEl.getBoundingClientRect();
         const w = tempRect.width;
@@ -322,7 +322,7 @@
           container.appendChild(span);
           span.getBoundingClientRect();
           span.style.visibility = "visible";
-          placeWord(span, bounds);
+          placeWord(container, span, bounds);
         });
       }
 
