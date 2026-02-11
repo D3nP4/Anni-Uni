@@ -149,6 +149,17 @@
         background: var(--accent-dark);
       }
 
+      .ghost {
+        background: transparent;
+        color: var(--accent-dark);
+        border: 1px solid rgba(212, 106, 79, 0.6);
+      }
+
+      .chat-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+
       .empty {
         color: var(--muted);
         text-align: center;
@@ -192,6 +203,10 @@
         <div class="empty" id="empty-state">No messages yet.</div>
       </section>
 
+      <div class="chat-actions">
+        <button type="button" class="ghost" id="clear-chat">Clear chat (password)</button>
+      </div>
+
       <form id="chat-form">
         <textarea id="message" name="message" placeholder="Type your message..." required></textarea>
         <button type="submit">Send</button>
@@ -204,6 +219,9 @@
         getFirestore,
         collection,
         addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
         serverTimestamp,
         query,
         orderBy,
@@ -227,6 +245,8 @@
       const emptyState = document.getElementById("empty-state");
       const form = document.getElementById("chat-form");
       const messageInput = document.getElementById("message");
+      const clearChatButton = document.getElementById("clear-chat");
+      const CLEAR_CHAT_PASSWORD = "admin";
 
       function formatTime(value) {
         if (!value) return "";
@@ -259,6 +279,17 @@
           createdAt: serverTimestamp()
         });
         messageInput.value = "";
+      });
+
+      clearChatButton.addEventListener("click", async () => {
+        const input = window.prompt("Enter password to clear the whole chat:");
+        if (!input || input !== CLEAR_CHAT_PASSWORD) {
+          return;
+        }
+
+        const snapshot = await getDocs(messagesRef);
+        const deletions = snapshot.docs.map((entry) => deleteDoc(doc(db, "chat_messages", entry.id)));
+        await Promise.all(deletions);
       });
 
       onSnapshot(query(messagesRef, orderBy("createdAt", "asc")), (snapshot) => {
