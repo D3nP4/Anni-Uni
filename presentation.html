@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Presentation View</title>
+    <title>ABOUT PERSPECTIVE</title>
     <style>
       :root {
         color-scheme: light;
@@ -177,7 +177,7 @@
   <body>
     <main class="page">
       <section class="hero">
-        <h1>Presentation view</h1>
+        <h1>ABOUT PERSPECTIVE</h1>
         <p>All answers visualized as a word cloud.</p>
         <div class="lang-switch">
           <button type="button" id="lang-de" class="active">German</button>
@@ -188,10 +188,8 @@
       <section class="panel">
         <span>Go to:</span>
         <a href="index.html">Home</a>
-        <a href="info.html">Info</a>
         <a href="fragen.html">Questions</a>
         <a href="chat.html">Chat</a>
-        <a href="answers.html">Show answers</a>
       </section>
 
       <section id="clouds" class="clouds-grid"></section>
@@ -221,7 +219,6 @@
       const db = getFirestore(app);
       const entriesRef = collection(db, "entries");
 
-      const VIEW_PASSWORD = "admin";
       const clouds = document.getElementById("clouds");
       const emptyState = document.getElementById("empty-state");
       const QUESTIONS = [
@@ -246,7 +243,6 @@
       const LANGUAGE_KEY = "anni_lang";
       let currentLang = localStorage.getItem(LANGUAGE_KEY) || "de";
       let latestEntries = [];
-      let prompted = false;
       const langDeBtn = document.getElementById("lang-de");
       const langEnBtn = document.getElementById("lang-en");
 
@@ -396,16 +392,6 @@
       }
 
       async function renderCloud() {
-        if (!prompted) {
-          const input = window.prompt("Enter password to view presentation:");
-          prompted = true;
-          if (!input || input !== VIEW_PASSWORD) {
-            emptyState.style.display = "block";
-            emptyState.textContent = "Password required.";
-            return;
-          }
-        }
-
         onSnapshot(query(entriesRef, orderBy("createdAt", "asc")), (snapshot) => {
           latestEntries = snapshot.docs.map((docSnap) => docSnap.data());
           redrawClouds(latestEntries);

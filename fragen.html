@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Answer Questions</title>
+    <title>ABOUT PERSPECTIVE</title>
     <style>
       :root {
         color-scheme: light;
@@ -230,7 +230,7 @@
   <body>
     <main class="page">
       <section class="hero">
-        <h1>Answer questions</h1>
+        <h1>ABOUT PERSPECTIVE</h1>
         <p>Answer the fixed questions. View everything on the answers page.</p>
         <div class="lang-switch">
           <button type="button" id="lang-de" class="active">Deutsch</button>
@@ -253,10 +253,8 @@
 
       <section class="panel" style="margin-top: 22px;">
         <strong>Go to:</strong>
-        <a href="index.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 6px;">Startseite</a>
-        <a href="info.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Info</a>
+        <a href="index.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 6px;">Home</a>
         <a href="chat.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Chat</a>
-        <a href="answers.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Answers</a>
         <a href="presentation.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Presentation</a>
       </section>
     </main>
@@ -417,6 +415,7 @@
         questionList.querySelectorAll("textarea").forEach((field) => {
           field.value = "";
         });
+        window.location.href = "presentation.html";
       });
 
       clearAll.addEventListener("click", async () => {
