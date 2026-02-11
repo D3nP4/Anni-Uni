@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Answer Questions</title>
+    <title>Startseite</title>
     <style>
       :root {
         color-scheme: light;
@@ -14,7 +14,6 @@
         --accent-dark: #b4533a;
         --card: #fff7ef;
         --shadow: rgba(26, 19, 15, 0.14);
-        --ring: rgba(212, 106, 79, 0.35);
       }
 
       * {
@@ -30,335 +29,104 @@
       }
 
       .page {
-        max-width: 980px;
+        max-width: 1040px;
         margin: 0 auto;
-        padding: 48px 20px 72px;
-        position: relative;
-      }
-
-      .hero {
-        display: grid;
-        gap: 16px;
-        margin-bottom: 28px;
+        padding: 56px 20px 72px;
       }
 
       .hero h1 {
-        font-size: clamp(2.2rem, 4vw, 3.4rem);
         margin: 0;
-        letter-spacing: 0.02em;
+        font-size: clamp(2.2rem, 4vw, 3.6rem);
       }
 
       .hero p {
-        margin: 0;
+        margin: 12px 0 0;
         color: var(--muted);
-        font-size: 1.1rem;
+        font-size: 1.12rem;
       }
 
-      .panel {
+      .grid {
+        margin-top: 30px;
+        display: grid;
+        gap: 16px;
+      }
+
+      @media (min-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+
+      .card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
         background: var(--card);
-        border-radius: 22px;
-        box-shadow: 0 18px 40px -26px var(--shadow);
-        padding: 24px;
-        border: 1px solid rgba(31, 26, 23, 0.05);
-      }
-
-      form {
-        display: grid;
-        gap: 18px;
-      }
-
-      label {
-        font-weight: 600;
-      }
-
-      textarea,
-      input,
-      select {
-        width: 100%;
-        border-radius: 14px;
-        border: 1px solid rgba(31, 26, 23, 0.2);
-        padding: 12px 14px;
-        font-size: 1rem;
-        background: #fffdf9;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      textarea:focus,
-      input:focus,
-      select:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--ring);
-      }
-
-      textarea {
-        min-height: 120px;
-        resize: vertical;
-      }
-
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      .question-list {
-        display: grid;
-        gap: 14px;
-      }
-
-      .question-item {
-        padding: 14px 16px;
-        border-radius: 16px;
-        border: 1px solid rgba(31, 26, 23, 0.1);
-        background: #fffdf8;
-      }
-
-      .question-item h3 {
-        margin: 0 0 8px;
-        font-size: 1.05rem;
-      }
-
-      button {
-        border: none;
-        border-radius: 999px;
-        padding: 12px 20px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        background: var(--accent);
-        color: #fffaf6;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 12px 22px -16px var(--shadow);
-      }
-
-      button:hover {
-        transform: translateY(-1px);
-        background: var(--accent-dark);
-      }
-
-      .ghost {
-        background: transparent;
-        color: var(--accent-dark);
-        border: 1px solid rgba(212, 106, 79, 0.6);
-      }
-
-      .answers {
-        margin-top: 36px;
-        display: grid;
-        gap: 18px;
-      }
-
-      .answer-card {
-        padding: 20px 22px;
-        border-radius: 18px;
-        background: #fffdf8;
+        border-radius: 24px;
         border: 1px solid rgba(31, 26, 23, 0.08);
-        box-shadow: 0 16px 30px -24px var(--shadow);
-        position: relative;
-        animation: fadeUp 0.5s ease both;
+        box-shadow: 0 18px 40px -24px var(--shadow);
+        padding: 22px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
 
-      .answer-card h3 {
-        margin: 0 0 8px;
-        font-size: 1.2rem;
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 24px 42px -24px var(--shadow);
       }
 
-      .answer-card p {
+      .card h2 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+      }
+
+      .card p {
         margin: 0;
         color: var(--muted);
         line-height: 1.5;
       }
 
-      .answer-card::after {
-        content: "";
-        position: absolute;
-        inset: 12px 12px auto auto;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--accent);
-        opacity: 0.5;
+      .panel {
+        margin-top: 20px;
+        background: var(--card);
+        border-radius: 18px;
+        border: 1px solid rgba(31, 26, 23, 0.08);
+        padding: 14px 18px;
       }
 
-      .empty {
-        text-align: center;
-        color: var(--muted);
-        padding: 18px;
-        border: 1px dashed rgba(31, 26, 23, 0.2);
-        border-radius: 16px;
-      }
-
-      @keyframes fadeUp {
-        from {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @media (max-width: 680px) {
-        .page {
-          padding: 32px 16px 60px;
-        }
-
-        .actions {
-          flex-direction: column;
-          align-items: stretch;
-        }
+      .panel a {
+        color: var(--accent-dark);
+        text-decoration: none;
+        font-weight: 600;
+        margin-right: 14px;
       }
     </style>
   </head>
   <body>
     <main class="page">
       <section class="hero">
-        <h1>Answer questions</h1>
-        <p>Answer the fixed questions. View everything on the answers page.</p>
+        <h1>Projekt Startseite</h1>
+        <p>Waehle den Bereich, den du jetzt benutzen willst.</p>
+      </section>
+
+      <section class="grid">
+        <a class="card" href="info.html">
+          <h2>Info</h2>
+          <p>Hintergrund, Perspektive und Design-Intention des Projekts.</p>
+        </a>
+        <a class="card" href="fragen.html">
+          <h2>Fragen</h2>
+          <p>Fragen beantworten und Antworten in der gemeinsamen Datenbank speichern.</p>
+        </a>
+        <a class="card" href="chat.html">
+          <h2>Chat</h2>
+          <p>Anonym kurze Nachrichten posten und live im Chat sehen.</p>
+        </a>
       </section>
 
       <section class="panel">
-        <form id="qa-form">
-          <div>
-            <label>Questions</label>
-            <div class="question-list" id="question-list"></div>
-          </div>
-          <div class="actions">
-            <button type="submit">Save answers</button>
-            <button type="button" class="ghost" id="clear-all">Clear all (password)</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="panel" style="margin-top: 22px;">
-        <strong>View:</strong>
-        <a href="answers.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 6px;">
-          Show answers
-        </a>
-        <a href="presentation.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">
-          Presentation view
-        </a>
-        <a href="chat.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">
-          Anonymous chat
-        </a>
+        <a href="answers.html">Antworten</a>
+        <a href="presentation.html">Presentation</a>
       </section>
     </main>
-
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-      import {
-        getFirestore,
-        collection,
-        addDoc,
-        getDocs,
-        deleteDoc,
-        doc,
-        serverTimestamp
-      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyCSNDvrvuwDketbB-AlfFoJQysooJdq6JY",
-        authDomain: "anni-uni.firebaseapp.com",
-        projectId: "anni-uni",
-        storageBucket: "anni-uni.firebasestorage.app",
-        messagingSenderId: "32747088221",
-        appId: "1:32747088221:web:5f239767a260925083a0b4"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const entriesRef = collection(db, "entries");
-
-      const form = document.getElementById("qa-form");
-      const questionList = document.getElementById("question-list");
-      const clearAll = document.getElementById("clear-all");
-      const CLEAR_PASSWORD = "admin";
-      const QUESTIONS = [
-        "What small habit makes your daily life better, even if it seems strange from the outside?",
-        "What skill did you teach yourself that you’re secretly proud of?",
-        "Which place in your home has the best story behind it?",
-        "What’s something you often think about but rarely say out loud?",
-        "If your day had a sound, what would it be today?",
-        "Which completely useless superpower would you love to have?",
-        "Which attribute would you refuse to level up in a video game on principle?",
-        "If you had a personal mascot, what would it look like?",
-        "What object describes you better than words could?",
-        "If your personality were a building, which one would it be and why?",
-        "Which color feels like “home” to you right now?",
-        "What smell immediately brings back memories for you?",
-        "Which small decision in your life ended up having a surprisingly big impact?",
-        "What would you love to learn again as if discovering it for the first time?",
-        "Which vision of the future gives you the most hope right now?",
-        "What is a dream project you hope to accomplish someday?",
-        "What kind of chaos motivates you, and what kind blocks you?",
-        "What kind of feedback style (direct, humorous, visual, etc.) works best for you?",
-        "What type of task makes you completely lose track of time?",
-        "What instantly makes a group feel likeable to you?",
-        "What item you use daily has a design you particularly appreciate?",
-        "Which type of landscape inspires you the most, and why?",
-        "If you could redesign a city, what is the first thing you would change?",
-        "Which everyday object do you think deserves more attention?"
-      ];
-
-      function renderQuestions() {
-        QUESTIONS.forEach((question, index) => {
-          const item = document.createElement("div");
-          item.className = "question-item";
-
-          const title = document.createElement("h3");
-          title.textContent = question;
-
-          const textarea = document.createElement("textarea");
-          textarea.name = `answer-${index}`;
-          textarea.placeholder = "Type your answer...";
-          textarea.dataset.question = question;
-
-          item.append(title, textarea);
-          questionList.appendChild(item);
-        });
-      }
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const saves = [];
-        questionList.querySelectorAll("textarea").forEach((field) => {
-          const answer = field.value.trim();
-          const question = field.dataset.question;
-          if (answer) {
-            saves.push(
-              addDoc(entriesRef, {
-                question,
-                answer,
-                createdAt: serverTimestamp()
-              })
-            );
-          }
-        });
-
-        if (saves.length === 0) {
-          return;
-        }
-
-        await Promise.all(saves);
-        questionList.querySelectorAll("textarea").forEach((field) => {
-          field.value = "";
-        });
-      });
-
-      clearAll.addEventListener("click", async () => {
-        const input = window.prompt("Enter password to clear all answers:");
-        if (!input || input !== CLEAR_PASSWORD) {
-          return;
-        }
-
-        const snapshot = await getDocs(entriesRef);
-        const deletions = snapshot.docs.map((entry) => deleteDoc(doc(db, "entries", entry.id)));
-        await Promise.all(deletions);
-      });
-
-      renderQuestions();
-    </script>
   </body>
 </html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Show Answers</title>
+    <title>Answer Questions</title>
     <style>
       :root {
         color-scheme: light;
@@ -33,6 +33,7 @@
         max-width: 980px;
         margin: 0 auto;
         padding: 48px 20px 72px;
+        position: relative;
       }
 
       .hero {
@@ -57,58 +58,95 @@
         background: var(--card);
         border-radius: 22px;
         box-shadow: 0 18px 40px -26px var(--shadow);
-        padding: 18px 22px;
+        padding: 24px;
         border: 1px solid rgba(31, 26, 23, 0.05);
-        margin-bottom: 22px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: center;
       }
 
-      a {
-        color: var(--accent-dark);
-        font-weight: 600;
-        text-decoration: none;
-      }
-
-      .answers {
+      form {
         display: grid;
         gap: 18px;
       }
 
-      @media (min-width: 920px) {
-        .answers {
-          grid-template-columns: 1fr 1fr;
-          align-items: start;
-        }
+      label {
+        font-weight: 600;
       }
 
-      .question-block {
-        padding: 16px 18px;
-        border-radius: 20px;
-        background: #fff6ea;
-        border: 1px solid rgba(31, 26, 23, 0.08);
-        box-shadow: 0 16px 30px -24px var(--shadow);
+      textarea,
+      input,
+      select {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid rgba(31, 26, 23, 0.2);
+        padding: 12px 14px;
+        font-size: 1rem;
+        background: #fffdf9;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      textarea:focus,
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--ring);
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .question-list {
         display: grid;
         gap: 14px;
       }
 
-      .question-block h2 {
-        margin: 0;
-        font-size: 1.15rem;
+      .question-item {
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 26, 23, 0.1);
+        background: #fffdf8;
       }
 
-      .answer-line {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.5;
-        padding: 6px 0;
-        border-bottom: 1px dashed rgba(31, 26, 23, 0.08);
+      .question-item h3 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
       }
 
-      .answer-line:last-of-type {
-        border-bottom: none;
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--accent);
+        color: #fffaf6;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 12px 22px -16px var(--shadow);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        background: var(--accent-dark);
+      }
+
+      .ghost {
+        background: transparent;
+        color: var(--accent-dark);
+        border: 1px solid rgba(212, 106, 79, 0.6);
+      }
+
+      .answers {
+        margin-top: 36px;
+        display: grid;
+        gap: 18px;
       }
 
       .answer-card {
@@ -166,27 +204,41 @@
         .page {
           padding: 32px 16px 60px;
         }
+
+        .actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
       }
     </style>
   </head>
   <body>
     <main class="page">
       <section class="hero">
-        <h1>Show answers</h1>
-        <p>All saved questions and answers grouped by question.</p>
+        <h1>Answer questions</h1>
+        <p>Answer the fixed questions. View everything on the answers page.</p>
       </section>
 
       <section class="panel">
-        <span>Go to:</span>
-        <a href="index.html">Startseite</a>
-        <a href="info.html">Info</a>
-        <a href="fragen.html">Fragen</a>
-        <a href="chat.html">Chat</a>
-        <a href="presentation.html">Presentation view</a>
+        <form id="qa-form">
+          <div>
+            <label>Questions</label>
+            <div class="question-list" id="question-list"></div>
+          </div>
+          <div class="actions">
+            <button type="submit">Save answers</button>
+            <button type="button" class="ghost" id="clear-all">Clear all (password)</button>
+          </div>
+        </form>
       </section>
 
-      <section class="answers" id="answers">
-        <div class="empty" id="empty-state">No answers saved yet.</div>
+      <section class="panel" style="margin-top: 22px;">
+        <strong>Go to:</strong>
+        <a href="index.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 6px;">Startseite</a>
+        <a href="info.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Info</a>
+        <a href="chat.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Chat</a>
+        <a href="answers.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Answers</a>
+        <a href="presentation.html" style="color: var(--accent-dark); font-weight: 600; margin-left: 16px;">Presentation</a>
       </section>
     </main>
 
@@ -195,9 +247,11 @@
       import {
         getFirestore,
         collection,
-        query,
-        orderBy,
-        onSnapshot
+        addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
+        serverTimestamp
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
       const firebaseConfig = {
@@ -212,6 +266,11 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
       const entriesRef = collection(db, "entries");
+
+      const form = document.getElementById("qa-form");
+      const questionList = document.getElementById("question-list");
+      const clearAll = document.getElementById("clear-all");
+      const CLEAR_PASSWORD = "admin";
       const QUESTIONS = [
         "What small habit makes your daily life better, even if it seems strange from the outside?",
         "What skill did you teach yourself that you’re secretly proud of?",
@@ -239,60 +298,63 @@
         "Which everyday object do you think deserves more attention?"
       ];
 
-      const answers = document.getElementById("answers");
-      const emptyState = document.getElementById("empty-state");
+      function renderQuestions() {
+        QUESTIONS.forEach((question, index) => {
+          const item = document.createElement("div");
+          item.className = "question-item";
 
-      function addAnswerLine(target, answer) {
-        const line = document.createElement("p");
-        line.className = "answer-line";
-        line.textContent = answer;
-        target.appendChild(line);
+          const title = document.createElement("h3");
+          title.textContent = question;
+
+          const textarea = document.createElement("textarea");
+          textarea.name = `answer-${index}`;
+          textarea.placeholder = "Type your answer...";
+          textarea.dataset.question = question;
+
+          item.append(title, textarea);
+          questionList.appendChild(item);
+        });
       }
 
-      function renderEntries(entries) {
-        answers.innerHTML = "";
-        if (entries.length === 0) {
-          emptyState.style.display = "block";
-          answers.appendChild(emptyState);
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const saves = [];
+        questionList.querySelectorAll("textarea").forEach((field) => {
+          const answer = field.value.trim();
+          const question = field.dataset.question;
+          if (answer) {
+            saves.push(
+              addDoc(entriesRef, {
+                question,
+                answer,
+                createdAt: serverTimestamp()
+              })
+            );
+          }
+        });
+
+        if (saves.length === 0) {
           return;
         }
 
-        emptyState.style.display = "none";
-        const byQuestion = new Map();
-        entries.forEach((entry) => {
-          if (!byQuestion.has(entry.question)) {
-            byQuestion.set(entry.question, []);
-          }
-          byQuestion.get(entry.question).push(entry);
+        await Promise.all(saves);
+        questionList.querySelectorAll("textarea").forEach((field) => {
+          field.value = "";
         });
-
-        QUESTIONS.forEach((question) => {
-          const block = document.createElement("section");
-          block.className = "question-block";
-
-          const header = document.createElement("h2");
-          header.textContent = question;
-          block.appendChild(header);
-
-          const answersForQuestion = byQuestion.get(question) || [];
-          if (answersForQuestion.length === 0) {
-            const empty = document.createElement("p");
-            empty.className = "answer-line";
-            empty.style.fontStyle = "italic";
-            empty.textContent = "No answers yet.";
-            block.appendChild(empty);
-          } else {
-            answersForQuestion.forEach((entry) => addAnswerLine(block, entry.answer));
-          }
-
-          answers.appendChild(block);
-        });
-      }
-
-      onSnapshot(query(entriesRef, orderBy("createdAt", "asc")), (snapshot) => {
-        const entries = snapshot.docs.map((docSnap) => docSnap.data());
-        renderEntries(entries);
       });
+
+      clearAll.addEventListener("click", async () => {
+        const input = window.prompt("Enter password to clear all answers:");
+        if (!input || input !== CLEAR_PASSWORD) {
+          return;
+        }
+
+        const snapshot = await getDocs(entriesRef);
+        const deletions = snapshot.docs.map((entry) => deleteDoc(doc(db, "entries", entry.id)));
+        await Promise.all(deletions);
+      });
+
+      renderQuestions();
     </script>
   </body>
 </html>
