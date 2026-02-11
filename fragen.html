@@ -54,6 +54,21 @@
         font-size: 1.1rem;
       }
 
+      .lang-switch {
+        margin-top: 10px;
+        display: inline-flex;
+        gap: 8px;
+      }
+
+      .lang-switch button {
+        padding: 8px 14px;
+        font-size: 0.95rem;
+      }
+
+      .lang-switch button.active {
+        background: var(--accent-dark);
+      }
+
       .panel {
         background: var(--card);
         border-radius: 22px;
@@ -217,6 +232,10 @@
       <section class="hero">
         <h1>Answer questions</h1>
         <p>Answer the fixed questions. View everything on the answers page.</p>
+        <div class="lang-switch">
+          <button type="button" id="lang-de" class="active">Deutsch</button>
+          <button type="button" id="lang-en">English</button>
+        </div>
       </section>
 
       <section class="panel">
@@ -270,50 +289,104 @@
       const form = document.getElementById("qa-form");
       const questionList = document.getElementById("question-list");
       const clearAll = document.getElementById("clear-all");
+      const langDeBtn = document.getElementById("lang-de");
+      const langEnBtn = document.getElementById("lang-en");
       const CLEAR_PASSWORD = "admin";
+      const LANGUAGE_KEY = "anni_lang";
+      let currentLang = localStorage.getItem(LANGUAGE_KEY) || "de";
       const QUESTIONS = [
-        "What small habit makes your daily life better, even if it seems strange from the outside?",
-        "What skill did you teach yourself that you’re secretly proud of?",
-        "Which place in your home has the best story behind it?",
-        "What’s something you often think about but rarely say out loud?",
-        "If your day had a sound, what would it be today?",
-        "Which completely useless superpower would you love to have?",
-        "Which attribute would you refuse to level up in a video game on principle?",
-        "If you had a personal mascot, what would it look like?",
-        "What object describes you better than words could?",
-        "If your personality were a building, which one would it be and why?",
-        "Which color feels like “home” to you right now?",
-        "What smell immediately brings back memories for you?",
-        "Which small decision in your life ended up having a surprisingly big impact?",
-        "What would you love to learn again as if discovering it for the first time?",
-        "Which vision of the future gives you the most hope right now?",
-        "What is a dream project you hope to accomplish someday?",
-        "What kind of chaos motivates you, and what kind blocks you?",
-        "What kind of feedback style (direct, humorous, visual, etc.) works best for you?",
-        "What type of task makes you completely lose track of time?",
-        "What instantly makes a group feel likeable to you?",
-        "What item you use daily has a design you particularly appreciate?",
-        "Which type of landscape inspires you the most, and why?",
-        "If you could redesign a city, what is the first thing you would change?",
-        "Which everyday object do you think deserves more attention?"
+        {
+          id: "habit",
+          de: "Welche kleine Gewohnheit von dir macht deinen Alltag besser, auch wenn sie von außen seltsam wirkt?",
+          en: "What small habit makes your daily life better, even if it seems strange from the outside?"
+        },
+        {
+          id: "task",
+          de: "Bei welcher Art Aufgabe vergisst du komplett die Zeit?",
+          en: "What type of task makes you completely lose track of time?"
+        },
+        {
+          id: "group",
+          de: "Was macht eine Gruppe für dich sofort sympathisch?",
+          en: "What instantly makes a group feel likeable to you?"
+        },
+        {
+          id: "item-design",
+          de: "Welche Sache nutzt du jeden Tag, deren Design du besonders schätzt?",
+          en: "What item you use daily has a design you particularly appreciate?"
+        },
+        {
+          id: "landscape",
+          de: "Welche Landschaft inspiriert dich am meisten und warum?",
+          en: "Which type of landscape inspires you the most, and why?"
+        },
+        {
+          id: "city",
+          de: "Wenn du eine Stadt neu entwerfen könntest: Was wäre das erste, das du ändern würdest?",
+          en: "If you could redesign a city, what is the first thing you would change?"
+        },
+        {
+          id: "everyday-object",
+          de: "Welcher Alltagsgegenstand verdient deiner Meinung nach mehr Aufmerksamkeit?",
+          en: "Which everyday object do you think deserves more attention?"
+        },
+        {
+          id: "skill",
+          de: "Welche Fähigkeit hast du dir selbst beigebracht, auf die du heimlich stolz bist?",
+          en: "What skill did you teach yourself that you’re secretly proud of?"
+        },
+        {
+          id: "place",
+          de: "Welcher Ort in deiner Wohnung oder deinem Haus hat die beste Geschichte?",
+          en: "Which place in your home has the best story behind it?"
+        },
+        {
+          id: "thought",
+          de: "Was ist etwas, das du oft denkst, aber selten laut aussprichst?",
+          en: "What’s something you often think about but rarely say out loud?"
+        },
+        {
+          id: "mascot",
+          de: "Wenn du ein Maskottchen hättest: Wie sähe es aus?",
+          en: "If you had a personal mascot, what would it look like?"
+        },
+        {
+          id: "object",
+          de: "Welches Objekt beschreibt dich besser als Worte könnten?",
+          en: "What object describes you better than words could?"
+        },
+        {
+          id: "building",
+          de: "Wenn dein Charakter ein Bauwerk wäre: Welches und warum?",
+          en: "If your personality were a building, which one would it be and why?"
+        }
       ];
 
-      function renderQuestions() {
+      function renderQuestions(lang) {
+        questionList.innerHTML = "";
         QUESTIONS.forEach((question, index) => {
           const item = document.createElement("div");
           item.className = "question-item";
 
           const title = document.createElement("h3");
-          title.textContent = question;
+          title.textContent = question[lang];
 
           const textarea = document.createElement("textarea");
           textarea.name = `answer-${index}`;
           textarea.placeholder = "Type your answer...";
-          textarea.dataset.question = question;
+          textarea.dataset.questionId = question.id;
 
           item.append(title, textarea);
           questionList.appendChild(item);
         });
+      }
+
+      function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem(LANGUAGE_KEY, lang);
+        langDeBtn.classList.toggle("active", lang === "de");
+        langEnBtn.classList.toggle("active", lang === "en");
+        renderQuestions(lang);
       }
 
       form.addEventListener("submit", async (event) => {
@@ -321,11 +394,14 @@
         const saves = [];
         questionList.querySelectorAll("textarea").forEach((field) => {
           const answer = field.value.trim();
-          const question = field.dataset.question;
+          const questionId = field.dataset.questionId;
+          const questionData = QUESTIONS.find((q) => q.id === questionId);
           if (answer) {
             saves.push(
               addDoc(entriesRef, {
-                question,
+                questionId,
+                questionDe: questionData ? questionData.de : "",
+                questionEn: questionData ? questionData.en : "",
                 answer,
                 createdAt: serverTimestamp()
               })
@@ -354,7 +430,9 @@
         await Promise.all(deletions);
       });
 
-      renderQuestions();
+      langDeBtn.addEventListener("click", () => setLanguage("de"));
+      langEnBtn.addEventListener("click", () => setLanguage("en"));
+      setLanguage(currentLang === "en" ? "en" : "de");
     </script>
   </body>
 </html>
